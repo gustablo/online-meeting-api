@@ -14,15 +14,22 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (client) => {
-    client.on('join', function(name){
+    client.on('join', function (name) {
         console.log('Joined: ' + name);
         users[client.id] = { id: client.id, name };
-        client.broadcast.emit('update', client.id)
-      });
+        client.broadcast.emit('update', { id: client.id, users })
+    });
 
     client.on('send', blob => {
-        console.log(blob);
         client.broadcast.emit('blob', { id: client.id, blob });
+    });
+
+    client.on('disconnect', _ => {
+        delete users[client.id];
+
+        client.broadcast.emit('update', { id: client.id, users });
+
+        client.broadcast.emit('user_disconnected', client.id);
     });
 });
 
