@@ -15,9 +15,10 @@ app.get('/', (req, res) => {
 
 io.on('connection', (client) => {
     client.on('join', function (name) {
-        console.log('Joined: ' + name);
         users[client.id] = { id: client.id, name };
-        client.broadcast.emit('update', { id: client.id, users })
+
+        io.to(client.id).emit('joined', client.id);
+        client.broadcast.emit('update', { id: client.id, users });
     });
 
     client.on('send', blob => {
